@@ -104,7 +104,7 @@
   </div>
 
   <script>
-    const fontConfig = {
+        const fontConfig = {
       legend: parseInt(getComputedStyle(document.documentElement).getPropertyValue('--font-legend')),
       title: parseInt(getComputedStyle(document.documentElement).getPropertyValue('--font-title-chart')),
       axis: parseInt(getComputedStyle(document.documentElement).getPropertyValue('--font-axis')),
@@ -149,6 +149,14 @@
       const r = parseFloat(document.getElementById('return').value);
       if (editingIndex !== null) {
         investments[editingIndex] = { entity: e, name: n, date: d, amount: a, return: r };
+        editingIndex = null;
+        document.getElementById('saveBtn').textContent = 'Ajouter';
+      } else {
+        investments.push({ entity: e, name: n, date: d, amount: a, return: r });
+      }
+      saveLocal();             // <-- save to localStorage
+      resetForm(); renderTable(); renderPie(); renderProjectionChart();
+    };
         editingIndex = null;
         document.getElementById('saveBtn').textContent = 'Ajouter';
       } else {
