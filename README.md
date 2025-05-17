@@ -89,6 +89,8 @@
   </table>
 
   <div id="summary"></div>
+  <!-- Bouton d'export CSV -->
+  <button id="exportBtn" style="margin-bottom:15px; padding:8px 12px;">Export CSV</button>
 
   <div class="charts-wrapper">
     <div class="chart-container pie-container">
@@ -104,7 +106,7 @@
   </div>
 
   <script>
-        const fontConfig = {
+    const fontConfig = {
       legend: parseInt(getComputedStyle(document.documentElement).getPropertyValue('--font-legend')),
       title: parseInt(getComputedStyle(document.documentElement).getPropertyValue('--font-title-chart')),
       axis: parseInt(getComputedStyle(document.documentElement).getPropertyValue('--font-axis')),
@@ -149,14 +151,6 @@
       const r = parseFloat(document.getElementById('return').value);
       if (editingIndex !== null) {
         investments[editingIndex] = { entity: e, name: n, date: d, amount: a, return: r };
-        editingIndex = null;
-        document.getElementById('saveBtn').textContent = 'Ajouter';
-      } else {
-        investments.push({ entity: e, name: n, date: d, amount: a, return: r });
-      }
-      saveLocal();             // <-- save to localStorage
-      resetForm(); renderTable(); renderPie(); renderProjectionChart();
-    };
         editingIndex = null;
         document.getElementById('saveBtn').textContent = 'Ajouter';
       } else {
@@ -251,6 +245,33 @@
         }
       });
     }
+	
+	 // Fonction pour exporter les données en CSV
+    function exportCSV() {
+      const headers = ['Entité', 'Nom', 'Date', 'Montant (€)', 'Rendement (%)', 'Valeur future (€)'];
+      const rows = investments.map(inv => {
+        const yrs = (new Date() - new Date(inv.date)) / msPerYear;
+        const future = inv.amount * Math.pow(1 + inv.return / 100, yrs);
+        return [
+          inv.entity,
+          inv.name,
+          inv.date,
+          inv.amount.toFixed(2).replace('.', ','),
+          inv.return.toFixed(2).replace('.', ','),
+          future.toFixed(2).replace('.', ',')
+        ];
+      });
+      const csv = [headers, ...rows].map(row => row.join(';')).join('\n');
+      const blob = new Blob(["\uFEFF" + csv], { type: 'text/csv;charset=utf-8;' });  // BOM pour Excel
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'investissements.csv';
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+
+    document.getElementById('exportBtn').addEventListener('click', exportCSV);
   </script>
 </body>
 </html>
